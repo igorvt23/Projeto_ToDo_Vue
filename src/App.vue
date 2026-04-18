@@ -6,14 +6,14 @@
     <div id="containerFilho">
       <TheHeader/>
       <div :id="idDivAdd">
-        <input type="text" :id="idInput" value="" @keyup.enter="addNewTasks">
+        <input type="text" :id="idInput" v-model="novoTexto" @keyup.enter="addNewTasks">
         <span @click="addNewTasks" :id="idDivBotao">+</span>
       </div>
       <div v-if="registros.length > 0" id="divRegistros">
         <div v-for="item in registros" >
           <div :class="classTable">
               <span @click="checkToDo(item.id)" :id="`registro_${item.id}`" :class="['check', (item.checked) ? 'checked' : 'unchecked']">✓</span>
-              <input type="text" :value="item.texto" placeholder="Digite suas tarefas">
+              <input type="text" v-model="item.texto" :id="`input_${item.id}`" placeholder="Digite suas tarefas">
               <span @click="removeTask(item.id)" :class="classRemoveButton">-</span>
           </div>
         </div>
@@ -34,6 +34,7 @@
       return {
         idx: 1,
         registros: [],
+        novoTexto: '',
 
         // IDS
         idInput: 'idNovoCampo',
@@ -48,21 +49,27 @@
     methods:{
         addNewTasks(){
 
-          const campo = document.getElementById(this.idInput);
-          if(campo.value.trim() != ""){
-            this.registros.push({"id": this.idx++, "texto": campo.value, checked: false });
-            campo.value = '';
+          if(this.novoTexto.trim() !== ''){
+            this.registros.push({
+              id: this.idx++,
+              texto: this.novoTexto,
+              checked: false
+            });
+
+            this.novoTexto = ''; // limpa input
           }
-          console.log('chegou aqui');
 
         },
         checkToDo(id){
             const checkToDo = this.registros.find(i => i.id === id);
             const registro = document.getElementById(`registro_${id}`);
+            const input = document.getElementById(`input_${id}`);
             if(registro.classList.contains('checked')){
-              checkToDo.checked = false;              
+              checkToDo.checked = false;  
+              input?.removeAttribute('disabled');
             } else {
               checkToDo.checked = true;
+              input?.setAttribute('disabled', 'disabled');
             }
         },
 
@@ -147,6 +154,7 @@
     color: #fff;
     font-weight: 700;
     font-size: 25px;
+    text-align: center;
 
     display: flex;
     align-items: center;
